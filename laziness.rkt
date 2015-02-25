@@ -9,6 +9,14 @@
            empty
            )))
 
+
+;;(build-infinite-list f) → (listof any/c)
+;;  f : (exact-nonnegative-integer? . -> . any/c)
+;; Lazily constructs the infinite list such that (list-ref (build-infinite-list f) i) returns (f i).
+(define (build-infinite-list f)
+  (cons f (build-infinite-list (+ f 1))))
+  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;TESTING METHODS
 
@@ -30,5 +38,6 @@
 (test (take-while (lambda (n) (< n 5)) (list 1 2 3 4 5 1 2)) 
       (list 1 2 3 4))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;TEST BUILD_INFINITE_LIST
 
-
+(list-ref (build-infinite-list 4) 6)
