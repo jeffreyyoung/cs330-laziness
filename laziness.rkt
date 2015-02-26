@@ -51,20 +51,34 @@
 (define primes (filter prime? (build-infinite-list 1)))
 
 
+(define (no-smaller-prime-divisors index num)
+  (cond
+    [(< 
+      (floor (sqrt num)) 
+      (list-ref primes index)) true]
+    [else (cond
+            [(= (remainder num (list-ref primes index)) 0) false]
+            [else (no-smaller-divisors (- index 1) num)])]))
+
+;(prime?/fast n) → boolean
+;  n : exact-positive-integer?
+;Returns true if n is prime, but tests only prime factors from primes/fast.
+(define (prime?/fast n)
+  (no-smaller-prime-divisors n (floor (sqrt n))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TEST TAKE_WHILE
+"TEST TAKE_WHILE"
 (test (take-while odd? (list 1 3 4))
       (list 1 3))
 
 (test (take-while (lambda (n) (< n 5)) (list 1 2 3 4 5 1 2)) 
       (list 1 2 3 4))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TEST BUILD_INFINITE_LIST
-
+"TEST BUILD_INFINITE_LIST"
 (test (list-ref (build-infinite-list 4) 6) 10)
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TEST PRIME?
+"TEST PRIME?"
 ;(test (prime? 0) #f)
 (test (prime? 1) #t)
 (test (prime? 2) #t)
@@ -77,9 +91,21 @@
 (test (prime? 6719) #t)  ;Broken
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TEST PRIMES
-
+"TEST PRIMES"
 (test (list-ref primes 0) 1)
 (test (list-ref primes 1) 2)
 (test (list-ref primes 2) 3)
-(test (list-ref primes 3) 5) ;Very Slow....
+;(test (list-ref primes 3) 5) ;Very Slow....
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+"TEST PRIME/FAST?"
+;(test (prime?/fast 0) #f)
+(test (prime?/fast 1) #t)
+(test (prime?/fast 2) #t)
+(test (prime?/fast 3) #t) ;Very Slow....
+(test (prime?/fast 4) #f)
+(test (prime?/fast 6) #f)
+(test (prime?/fast 7) #t) ;Broken
+(test (prime?/fast 8) #f)
+(test (prime?/fast 6708) #f)
+(test (prime?/fast 6719) #t)  ;Broken
