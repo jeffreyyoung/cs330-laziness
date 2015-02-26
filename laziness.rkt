@@ -34,7 +34,7 @@
     [(= div 1) true]
     [else (cond
             [(= (remainder number div) 0) false]
-            [else (no-smaller-divisors (sub1 div) number)])]))
+            [else (no-smaller-divisors (- div 1) number)])]))
 
 (test (no-smaller-divisors 2 20) #f); 
 (test (no-smaller-divisors 6 7) #t);
@@ -45,6 +45,11 @@
 (define (prime? n)
   (no-smaller-divisors n (floor (sqrt n))))
   
+
+;primes : (listof exact-positive-integer?)
+;The list of all primes.
+(define primes (filter prime? (build-infinite-list 1)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;TEST TAKE_WHILE
@@ -70,3 +75,11 @@
 (test (prime? 8) #f)
 (test (prime? 6708) #f)
 (test (prime? 6719) #t)  ;Broken
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;TEST PRIMES
+
+(test (list-ref primes 0) 1)
+(test (list-ref primes 1) 2)
+(test (list-ref primes 2) 3)
+(test (list-ref primes 3) 5) ;Very Slow....
