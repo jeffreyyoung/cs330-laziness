@@ -1,5 +1,17 @@
 #lang lazy
 
+(define print-only-errors #f)
+
+;;test function, passes if the parameters l r are equal, otherwise fails
+(define (test l r)
+  (if (equal? l r)
+      (if print-only-errors
+          ()
+          (printf "Test Passed~n"))
+      (printf "Test Failed.~nActual:   ~S ~nExpected: ~S~n" l r)))
+
+
+
 ;; returns the prefix of l such that for all elements p returns true
 (define (take-while p l)
    (if (empty? l)
@@ -15,20 +27,24 @@
 ;; Lazily constructs the infinite list such that (list-ref (build-infinite-list f) i) returns (f i).
 (define (build-infinite-list f)
   (cons f (build-infinite-list (+ f 1))))
+
+
+(define (no-smaller-divisors div number)
+  (cond
+    [(= div 1) true]
+    [else (cond
+            [(= (remainder number div) 0) false]
+            [else (no-smaller-divisors (sub1 div) number)])]))
+
+(test (no-smaller-divisors 2 20) #f); 
+(test (no-smaller-divisors 6 7) #t);
+
+;(prime? n) → boolean?
+;  n : exact-positive-integer?
+;Returns true if n is prime.
+(define (prime? n)
+  (no-smaller-divisors n (floor (sqrt n))))
   
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;TESTING METHODS
-
-(define print-only-errors #f)
-
-;;test function, passes if the parameters l r are equal, otherwise fails
-(define (test l r)
-  (if (equal? l r)
-      (if print-only-errors
-          ()
-          (printf "Test Passed~n"))
-      (printf "Test Failed.~nActual:   ~S ~nExpected: ~S~n" l r)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;TEST TAKE_WHILE
@@ -40,4 +56,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;TEST BUILD_INFINITE_LIST
 
-(list-ref (build-infinite-list 4) 6)
+(test (list-ref (build-infinite-list 4) 6) 10)
+  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;TEST PRIME?
+;(test (prime? 0) #f)
+(test (prime? 1) #t)
+(test (prime? 2) #t)
+(test (prime? 3) #t)
+(test (prime? 4) #f)
+(test (prime? 6) #f)
+(test (prime? 7) #t) ;Broken
+(test (prime? 8) #f)
+(test (prime? 6708) #f)
+(test (prime? 6719) #t)  ;Broken
