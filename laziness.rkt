@@ -66,6 +66,20 @@
 (define (prime?/fast n)
   (no-smaller-prime-divisors n (floor (sqrt n))))
 
+
+;(build-table rows cols f) → (vectorof (vectorof any/c))
+;  rows : exact-positive-integer?
+;  cols : exact-positive-integer?
+;     f : (exact-nonnegative-integer? exact-nonnegative-integer? . -> . any/c)
+(define (build-table rows cols f)
+  (build-vector cols (lambda (x)
+                       (build-vector rows (lambda (y)
+                                            (f x y))))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+"TEST BUILD-TABLE"
+(test (- 4 3)
+      (vector-ref (vector-ref (build-table 5 5 (lambda (x y) (- x y))) 4 )3))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 "TEST TAKE_WHILE"
 (test (take-while odd? (list 1 3 4))
