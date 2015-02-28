@@ -75,6 +75,37 @@
   (build-vector cols (lambda (x)
                        (build-vector rows (lambda (y)
                                             (f x y))))))
+
+;get's the nth char of a string starting with 1
+(define (get-nth-char s n)
+  (if (equal? n 0)
+      #f
+      (string-ref s (- n 1))))
+
+;retrieves an element from a table
+(define (get-table-element table x y)
+  (vector-ref (vector-ref table x )y))
+
+;Computes the length of the longest common subsequence of two strings s1 and s2.
+(define (lcs-length s1 s2)
+  (letrec ([table (build-table (+ 1 (string-length s1))
+               (+ 1 (string-length s2))
+               (lambda (x y)
+                 (cond 
+                   [(or (equal? 0 x) (equal? 0 y)) 0]
+                   [(equal? (get-nth-char s1 y) (get-nth-char s2 x)) (+ 1 (get-table-element table (- x 1) (- y 1)))]
+                   [else (max   (get-table-element table x (- y 1))   (get-table-element table (- x 1) y)    )]
+                 )))])
+    (get-table-element table (string-length s2) (string-length s1) )
+  ))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+"TEST LCS-LENGTH"
+(test (lcs-length "meo" "meow") 3)
+(test (lcs-length "aaabbb" "bbbaaa") 3)
+(test (lcs-length "ababqb" "bbbaaa") 3)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 "TEST BUILD-TABLE"
 (test (- 4 3)
