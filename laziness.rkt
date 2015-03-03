@@ -26,8 +26,10 @@
 ;;  f : (exact-nonnegative-integer? . -> . any/c)
 ;; Lazily constructs the infinite list such that (list-ref (build-infinite-list f) i) returns (f i).
 (define (build-infinite-list f)
-  (append (list f) (build-infinite-list f)))
+  (build-infinite-list-recur f 0))
 
+(define (build-infinite-list-recur f i)
+  (append (list (f i)) (build-infinite-list-recur f (+ i 1))))
 
 (define (no-smaller-divisors div number)
   (cond
@@ -59,21 +61,33 @@
 (define primes (filter prime? (larger-positive-integers 1)))
 
 
-(define (no-smaller-prime-divisors index num)
-  (cond
-    [(< 
-      (floor (sqrt num)) 
-      (list-ref primes index)) true]
-    [else (cond
-            [(= (remainder num (list-ref primes index)) 0) false]
-            [else (no-smaller-divisors (- index 1) num)])]))
+(define (get-next-prime p)
+  (if (prime?/fast (+ p 1))
+      (+ p 1)
+      (get-next-prime (+ p 1))))
 
 ;(prime?/fast n) → boolean
 ;  n : exact-positive-integer?
 ;Returns true if n is prime, but tests only prime factors from primes/fast.
 (define (prime?/fast n)
-  (no-smaller-prime-divisors n (floor (sqrt n))))
+  (cond
+        [(= n 0) #f]
+        [(= n 1) #f]
+        [else (prime?/fast-rec n 0)]))
+        
 
+(define (prime?/fast-rec n i)
+  (cond [(>(expt (list-ref (primes/fast) i) 2) n) #t]
+        [(exact-positive-integer? (/ n (list-ref (primes/fast) i))) #f]
+        [else (prime?/fast-rec n (+ i 1))]))
+
+;primes/fast : (listof exact-positive-integer?)
+;The list of all primes constructed with prime?/fast.
+(define (primes/fast) 
+  (append (list 2) (primes/fast-rec 3)))
+
+(define (primes/fast-rec lastPrime)
+  (append (list lastPrime) (primes/fast-rec (get-next-prime lastPrime))))
 
 ;(build-table rows cols f) → (vectorof (vectorof any/c))
 ;  rows : exact-positive-integer?
@@ -175,13 +189,18 @@
       empty)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 "TEST BUILD_INFINITE_LIST"
-(define (f i) (+ i 1))
-(test (list-ref (build-infinite-list 4) 6) 4)
-(test (list-ref (build-infinite-list 3) 1) 3)
-(test (list-ref (build-infinite-list 5) 10) 5)
-(test (list-ref (build-infinite-list 0) 0) 0)
-(test (list-ref (build-infinite-list f) 10) 0)
-  
+(define (add1 i) (+ i 1))
+(define (same i) i)
+(define (mult5 i) (* i 5))
+(test (list-ref (build-infinite-list add1) 10) 11)
+(test (list-ref (build-infinite-list add1) 612) 613)
+(test (list-ref (build-infinite-list same) 0) 0)
+(test (list-ref (build-infinite-list same) 1) 1)
+(test (list-ref (build-infinite-list same) 53) 53)
+(test (list-ref (build-infinite-list mult5) 0) 0)
+(test (list-ref (build-infinite-list mult5) 10) 50)
+(test (list-ref (build-infinite-list mult5) 543) 2715)
+(test (list-ref (build-infinite-list mult5) 20) 100)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 "TEST PRIME?"
 (test (prime? -1) #f)
@@ -207,25 +226,36 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-"TEST PRIME/FAST?"
+"TEST PRIME?/FAST"
 (test (prime?/fast 0) #f)
-(test (prime?/fast 1) #t)
+(test (prime?/fast 1) #f)
 (test (prime?/fast 2) #t)
-(test (prime?/fast 3) #t) ;Very Slow....
+(test (prime?/fast 3) #t) 
 (test (prime?/fast 4) #f)
 (test (prime?/fast 6) #f)
-(test (prime?/fast 7) #t) ;Broken
+(test (prime?/fast 7) #t) 
 (test (prime?/fast 8) #f)
+(test (prime?/fast 87) #f)
+(test (prime?/fast 89) #t)
+(test (prime?/fast 459) #f)
+(test (prime?/fast 1000) #f)
+(test (prime?/fast 1002) #f)
+(test (prime?/fast 1005) #f)
+(test (prime?/fast 1011) #f)
+(test (prime?/fast 1513) #f)
+(test (prime?/fast 3017) #f)
 (test (prime?/fast 6708) #f)
-(test (prime?/fast 6719) #t)  ;Broken
+(test (prime?/fast 6719) #t)  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 "TEST PRIMES/FAST"
-;(test (primes/fast 87) #f)
-;(test (primes/fast 89) #t)
-;(test (primes/fast 459) #f)
-;(test (primes/fast 1000) #f)
-;(test (primes/fast 1002) #f)
-;(test (primes/fast 1011) #f)
-;(test (primes/fast 1005) #f)
-;(test (primes/fast 3017) #f)
-;(test (primes/fast 1513) #f)
+(test (list-ref (primes/fast) 0) 2)
+(test (list-ref (primes/fast) 1) 3)
+(test (list-ref (primes/fast) 2) 5)
+(test (list-ref (primes/fast) 3) 7)
+(test (list-ref (primes/fast) 4) 11)
+(test (list-ref (primes/fast) 5) 13)
+(test (list-ref (primes/fast) 6) 17)
+(test (list-ref (primes/fast) 7) 19)
+(test (list-ref (primes/fast) 8) 23)
+(test (list-ref (primes/fast) 80) 419)
+(test (list-ref (primes/fast) 200) 1229)
